@@ -28,9 +28,8 @@ First, use Nmap to scan the target machine to look for active listening services
 
 General command-line syntax:
 
-    ```
     hydra -l username -P wordlist.txt server service
-    ```
+
 where:
 
 - `-l username`: `-l` should precede the `username`, i.e. the login name of the target. You should omit this option if the service does not use a username.
@@ -45,8 +44,5 @@ There are some extra optional arguments that you can add:
 
 Examples:
 
-    ```
     hydra -l mark -P /usr/share/wordlists/rockyou.txt 10.10.41.165 ssh
     hydra -l mark -P /usr/share/wordlists/rockyou.txt ssh://10.10.41.165
-    ```
-    These two are equivalent.
